@@ -25,6 +25,8 @@ private:
 
 	ros::Subscriber bodies_sub;
 
+	int track_id;
+
 	void bodies_callback(const kinect_msgs::SkeletonArray &bodies);
 
 	void broadcast_body_tf(ros::Time stamp, const kinect_msgs::Skeleton &body);
