@@ -1,83 +1,101 @@
-#include "../include/kinect_v2/kinect_v2_hands.h"
+#include "../include/kinect_v2/kinect_v2_joy.h"
 
-KinectV2Hands::KinectV2Hands(){
+KinectV2Joy::KinectV2Joy(){
 	ros::NodeHandle private_nh("~");
 
-	hand_sub = private_nh.subscribe("/kinect_v2/hand_state", 1, &KinectV2Hands::hand_callback, this);
-	marker_pub = private_nh.advertise<visualization_msgs::Marker>("/hand_markers", 1);
+	hand_sub = private_nh.subscribe("/kinect_v2/hand_state", 1, &KinectV2Joy::hand_callback, this);
+	joy_sub  = private_nh.subscribe("/hydra_joy", 1, &KinectV2Joy::hydra_callback, this);
+	joy_pub  = private_nh.advertise<sensor_msgs::Joy>("/kinect_v2/joy", 1);
+
+	private_nh.param("lopen_button", lopen_button, 5);
+    private_nh.param("lclose_button", lclose_button, 7);
+
+    private_nh.param("ropen_button", ropen_button, 13);
+    private_nh.param("rclose_button", rclose_button, 15);
+
+    private_nh.param("n_buttons", n_buttons, 16);
+    private_nh.param("n_axes", n_axes, 16);
+
+    if(    lopen_button  > n_buttons
+    	|| lclose_button > n_buttons
+    	|| ropen_button  > n_buttons
+    	|| rclose_button > n_buttons
+    	|| lopen_button  < 0
+    	|| lclose_button < 0
+    	|| ropen_button  < 0
+    	|| rclose_button < 0
+    	)
+    {
+    	ROS_FATAL("buttons exceed array bounds");
+    	exit(1);
+    }
+
+    joy_msg.buttons.resize(n_buttons);
+    joy_msg.axes.resize(n_axes);
 
 	ros::spin();
 }
 
-void KinectV2Hands::hand_callback(const kinect_msgs::HandState &hand){
-	std::ostringstream stream;
-	stream << hand.id;
-	std::string id = stream.str();	
-
-	marker_pub.publish(get_marker(hand.header.stamp, "/handright_" + id, "righthand", hand.id, hand.right));
-	marker_pub.publish(get_marker(hand.header.stamp, "/handleft_" + id, "lefthand", hand.id, hand.left));
-}
-
-visualization_msgs::Marker KinectV2Hands::get_marker(ros::Time stamp, std::string frame_id, std::string ns, int id, int state){
-	visualization_msgs::Marker marker;
-
-	marker.header.frame_id = frame_id;
-	marker.ns              = ns;
-
-	marker.header.stamp = stamp;
-	marker.id           = id;
-
-	marker.type = visualization_msgs::Marker::SPHERE;
-	marker.action = visualization_msgs::Marker::ADD;
-
-	marker.pose.position.x = 0;
-	marker.pose.position.y = 0;
-	marker.pose.position.z = 0;
-	marker.pose.orientation.x = 0.0;
-	marker.pose.orientation.y = 0.0;
-	marker.pose.orientation.z = 0.0;
-	marker.pose.orientation.w = 1.0;
-
-	marker.scale.x = 0.25;
-	marker.scale.y = 0.25;
-	marker.scale.z = 0.25;
-
-	switch(state){
-		case HANDSTATE_UNKNOWN:
-			marker.color.r = 0.75f;
-			marker.color.g = 0.75f;
-			marker.color.b = 0.75f;
+void KinectV2Joy::hand_callback(const kinect_msgs::HandState &hand){
+	switch(hand.left){
+		case kinect_msgs::HandState::OPEN:
+			joy_msg.buttons[lopen_button] = true;
+			joy_msg.buttons[lclose_button] = false;
 			break;
-		case HANDSTATE_NOTTRACKED:
-			marker.color.r = 1.0f;
-			marker.color.g = 1.0f;
-			marker.color.b = 1.0f;
-			break;
-		case HANDSTATE_OPEN:
-			marker.color.r = 0.0f;
-			marker.color.g = 1.0f;
-			marker.color.b = 0.0f;
-			break;
-		case HANDSTATE_CLOSED:
-			marker.color.r = 1.0f;
-			marker.color.g = 0.0f;
-			marker.color.b = 0.0f;
-			break;
-		case HANDSTATE_LASSO:
-			marker.color.r = 0.0f;
-			marker.color.g = 0.0f;
-			marker.color.b = 1.0f;
+		case kinect_msgs::HandState::CLOSED:
+			joy_msg.buttons[lopen_button] = false;
+			joy_msg.buttons[lclose_button] = true;
 			break;
 		default:
-			ROS_WARN("Unexpected hand state value");
-			marker.color.r = 0.0f;
-			marker.color.g = 0.0f;
-			marker.color.b = 0.0f;
+			joy_msg.buttons[lopen_button] = false;
+			joy_msg.buttons[lclose_button] = false;
+			break;
 	}
-	
-	marker.color.a = 0.5;
 
-	marker.lifetime = ros::Duration(0.5);
+	switch(hand.right){
+		case kinect_msgs::HandState::OPEN:
+			joy_msg.buttons[ropen_button] = true;
+			joy_msg.buttons[rclose_button] = false;
+			break;
+		case kinect_msgs::HandState::CLOSED:
+			joy_msg.buttons[ropen_button] = false;
+			joy_msg.buttons[rclose_button] = true;
+			break;
+		default:
+			joy_msg.buttons[ropen_button] = false;
+			joy_msg.buttons[rclose_button] = false;
+			break;
+	}
+}
 
-	return marker;
+void KinectV2Joy::hydra_callback(const sensor_msgs::Joy &joy){
+	if(joy.buttons.size() != n_buttons){
+		ROS_ERROR("joy message has unexpected number of buttons");
+		return;
+	}
+
+	if(joy.axes.size() != n_axes){
+		ROS_ERROR("joy message has unexpected number of axes");
+		return;
+	}
+
+	for(int i = 0; i < n_buttons; i++){
+		if(    i != lopen_button
+			&& i != lclose_button
+			&& i != ropen_button
+			&& i != rclose_button
+			)
+		{
+			joy_msg.buttons[i] = joy.buttons[i];
+		}
+	}
+
+	for(int i = 0; i < n_axes; i++){
+		joy_msg.axes[i] = joy.axes[i];
+	}
+
+	joy_msg.header.frame_id = joy.header.frame_id;
+	joy_msg.header.stamp    = joy.header.stamp;
+
+	joy_pub.publish(joy_msg);
 }
