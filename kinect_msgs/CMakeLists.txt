@@ -49,6 +49,11 @@ add_message_files(
   HandState.msg
   Skeleton.msg
   SkeletonArray.msg
+  Activity.msg
+  Expression.msg
+  Engaged.msg
+  DetectionResult.msg
+  Appearance.msg
 )
 
 ## Generate services in the 'srv' folder
