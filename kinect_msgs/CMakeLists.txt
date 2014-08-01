@@ -54,6 +54,7 @@ add_message_files(
   Engaged.msg
   DetectionResult.msg
   Appearance.msg
+  Lean.msg
 )
 
 ## Generate services in the 'srv' folder
