@@ -1,5 +1,5 @@
-#ifndef KINECT_V2_TF_H
-#define KINECT_V2_TF_H
+#ifndef KINECT_V2_SURROGATE_H
+#define KINECT_V2_SURROGATE_H
 
 #include <sstream>
 #include <cmath>
@@ -11,14 +11,12 @@
 #include <geometry_msgs/Point.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/Pose.h>
-#include "SkeletonArray.h"
-#include "Skeleton.h"
+#include <kinect_msgs/SkeletonArray.h>
+#include <kinect_msgs/Skeleton.h>
 
-#include "kinect_vals.h"
-
-class KinectV2Tf {
+class KinectV2Surrogate {
 public:
-	KinectV2Tf();
+	KinectV2Surrogate();
 
 private:
 	tf::TransformBroadcaster broadcaster;

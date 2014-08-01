@@ -5,10 +5,8 @@
 
 #include <ros/ros.h>
 #include <ros/console.h>
-#include "HandState.h"
+#include <kinect_msgs/HandState.h>
 #include <visualization_msgs/Marker.h>
-
-#include "kinect_vals.h"
 
 class KinectV2Hands {
 public:

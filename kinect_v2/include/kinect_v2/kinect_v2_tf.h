@@ -10,10 +10,8 @@
 #include <geometry_msgs/Point.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/Pose.h>
-#include "SkeletonArray.h"
-#include "Skeleton.h"
-
-#include "kinect_vals.h"
+#include <kinect_msgs/SkeletonArray.h>
+#include <kinect_msgs/Skeleton.h>
 
 class KinectV2Tf {
 public:
@@ -23,7 +21,7 @@ private:
 	tf::TransformBroadcaster broadcaster;
 
 	ros::Subscriber bodies_sub;
-	ros::Publisher test_sub;
+	ros::Publisher test_pub;
 
 	void bodies_callback(const kinect_msgs::SkeletonArray &bodies);
 
