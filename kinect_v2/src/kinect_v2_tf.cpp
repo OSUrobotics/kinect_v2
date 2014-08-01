@@ -17,6 +17,7 @@ KinectV2Tf::KinectV2Tf(){
 	ros::NodeHandle private_nh("~");
 
 	bodies_sub = private_nh.subscribe("/kinect_v2/bodies", 1, &KinectV2Tf::bodies_callback, this);
+	test_pub   = private_nh.advertise<geometry_msgs::PoseArray>("test", 1);
 
 	ros::spin();
 }
@@ -47,45 +48,51 @@ void KinectV2Tf::broadcast_body_tf(ros::Time stamp, const kinect_msgs::Skeleton 
 	kinect.position    = pt;
 	kinect.orientation = q;
 
+	geometry_msgs::PoseArray pa;
+	pa.header.frame_id = "kinect_v2";
+	for(int i = 0; i < 25; i++)
+		pa.poses.push_back(body.joints[i]);
+	test_pub.publish(pa);
+
 	// Head
 	// the kinect gives an orientation of 0, 0, 0, 0 for the head so we need to change it to scare off nan's 
-	geometry_msgs::Pose head = body.joints[JOINTTYPE_HEAD];
+	geometry_msgs::Pose head = body.joints[kinect_msgs::Skeleton::HEAD];
 	head.orientation.w = 1.0;
-	broadcast_joint_tf(stamp, kinect,                               head,                                 "/kinect_v2",          "head_" + id);
+	broadcast_joint_tf(stamp, kinect,                                            head,                                              "/kinect_v2",          "head_" + id);
 
 	// Torso
-	broadcast_joint_tf(stamp, head,                                 body.joints[JOINTTYPE_NECK],          "head_" + id,          "neck_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_NECK],          body.joints[JOINTTYPE_SPINESHOULDER], "neck_" + id,          "spineshoulder_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINESHOULDER], body.joints[JOINTTYPE_SPINEMID],      "spineshoulder_" + id, "spinemid_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINEMID],      body.joints[JOINTTYPE_SPINEBASE],     "spinemid_" + id,      "spinebase_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINESHOULDER], body.joints[JOINTTYPE_SHOULDERRIGHT], "spineshoulder_" + id, "shoulderright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINESHOULDER], body.joints[JOINTTYPE_SHOULDERLEFT],  "spineshoulder_" + id, "shoulderleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINEBASE],     body.joints[JOINTTYPE_HIPRIGHT],      "spinebase_" + id,     "hipright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SPINEBASE],     body.joints[JOINTTYPE_HIPLEFT],       "spinebase_" + id,     "hipleft_" + id);
+	broadcast_joint_tf(stamp, head,                                              body.joints[kinect_msgs::Skeleton::NECK],          "head_" + id,          "neck_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::NECK],          body.joints[kinect_msgs::Skeleton::SPINESHOULDER], "neck_" + id,          "spineshoulder_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINESHOULDER], body.joints[kinect_msgs::Skeleton::SPINEMID],      "spineshoulder_" + id, "spinemid_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINEMID],      body.joints[kinect_msgs::Skeleton::SPINEBASE],     "spinemid_" + id,      "spinebase_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINESHOULDER], body.joints[kinect_msgs::Skeleton::SHOULDERRIGHT], "spineshoulder_" + id, "shoulderright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINESHOULDER], body.joints[kinect_msgs::Skeleton::SHOULDERLEFT],  "spineshoulder_" + id, "shoulderleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINEBASE],     body.joints[kinect_msgs::Skeleton::HIPRIGHT],      "spinebase_" + id,     "hipright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SPINEBASE],     body.joints[kinect_msgs::Skeleton::HIPLEFT],       "spinebase_" + id,     "hipleft_" + id);
 	
 	// Right Arm    
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SHOULDERRIGHT], body.joints[JOINTTYPE_ELBOWRIGHT],    "shoulderright_" + id, "elbowright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_ELBOWRIGHT],    body.joints[JOINTTYPE_WRISTRIGHT],    "elbowright_" + id,    "wristright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_WRISTRIGHT],    body.joints[JOINTTYPE_HANDRIGHT],     "wristright_" + id,    "handright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_HANDRIGHT],     body.joints[JOINTTYPE_HANDTIPRIGHT],  "handright_" + id,     "handtipright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_WRISTRIGHT],    body.joints[JOINTTYPE_THUMBRIGHT],    "wristright_" + id,    "thumbright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SHOULDERRIGHT], body.joints[kinect_msgs::Skeleton::ELBOWRIGHT],    "shoulderright_" + id, "elbowright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::ELBOWRIGHT],    body.joints[kinect_msgs::Skeleton::WRISTRIGHT],    "elbowright_" + id,    "wristright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::WRISTRIGHT],    body.joints[kinect_msgs::Skeleton::HANDRIGHT],     "wristright_" + id,    "handright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::HANDRIGHT],     body.joints[kinect_msgs::Skeleton::HANDTIPRIGHT],  "handright_" + id,     "handtipright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::WRISTRIGHT],    body.joints[kinect_msgs::Skeleton::THUMBRIGHT],    "wristright_" + id,    "thumbright_" + id);
 
 	// Left Arm
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_SHOULDERLEFT],  body.joints[JOINTTYPE_ELBOWLEFT],     "shoulderleft_" + id,  "elbowleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_ELBOWLEFT],     body.joints[JOINTTYPE_WRISTLEFT],     "elbowleft_" + id,     "wristleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_WRISTLEFT],     body.joints[JOINTTYPE_HANDLEFT],      "wristleft_" + id,     "handleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_HANDLEFT],      body.joints[JOINTTYPE_HANDTIPLEFT],   "handleft_" + id,      "handtipleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_WRISTLEFT],     body.joints[JOINTTYPE_THUMBLEFT],     "wristleft_" + id,     "thumbleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::SHOULDERLEFT],  body.joints[kinect_msgs::Skeleton::ELBOWLEFT],     "shoulderleft_" + id,  "elbowleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::ELBOWLEFT],     body.joints[kinect_msgs::Skeleton::WRISTLEFT],     "elbowleft_" + id,     "wristleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::WRISTLEFT],     body.joints[kinect_msgs::Skeleton::HANDLEFT],      "wristleft_" + id,     "handleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::HANDLEFT],      body.joints[kinect_msgs::Skeleton::HANDTIPLEFT],   "handleft_" + id,      "handtipleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::WRISTLEFT],     body.joints[kinect_msgs::Skeleton::THUMBLEFT],     "wristleft_" + id,     "thumbleft_" + id);
 
 	// Right Leg
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_HIPRIGHT],      body.joints[JOINTTYPE_KNEERIGHT],     "hipright_" + id,      "kneeright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_KNEERIGHT],     body.joints[JOINTTYPE_ANKLERIGHT],    "kneeright_" + id,     "ankleright_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_ANKLERIGHT],    body.joints[JOINTTYPE_FOOTRIGHT],     "ankleright_" + id,    "footright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::HIPRIGHT],      body.joints[kinect_msgs::Skeleton::KNEERIGHT],     "hipright_" + id,      "kneeright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::KNEERIGHT],     body.joints[kinect_msgs::Skeleton::ANKLERIGHT],    "kneeright_" + id,     "ankleright_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::ANKLERIGHT],    body.joints[kinect_msgs::Skeleton::FOOTRIGHT],     "ankleright_" + id,    "footright_" + id);
 
 	// Left Leg
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_HIPLEFT],       body.joints[JOINTTYPE_KNEELEFT],      "hipleft_" + id,       "kneeleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_KNEELEFT],      body.joints[JOINTTYPE_ANKLELEFT],     "kneeleft_" + id,      "ankleleft_" + id);
-	broadcast_joint_tf(stamp, body.joints[JOINTTYPE_ANKLELEFT],     body.joints[JOINTTYPE_FOOTLEFT],      "ankleleft_" + id,     "footleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::HIPLEFT],       body.joints[kinect_msgs::Skeleton::KNEELEFT],      "hipleft_" + id,       "kneeleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::KNEELEFT],      body.joints[kinect_msgs::Skeleton::ANKLELEFT],     "kneeleft_" + id,      "ankleleft_" + id);
+	broadcast_joint_tf(stamp, body.joints[kinect_msgs::Skeleton::ANKLELEFT],     body.joints[kinect_msgs::Skeleton::FOOTLEFT],      "ankleleft_" + id,     "footleft_" + id);
 }
 
 void KinectV2Tf::broadcast_joint_tf(ros::Time stamp, geometry_msgs::Pose parent_pos, geometry_msgs::Pose child_pos, std::string parent, std::string child){
