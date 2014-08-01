@@ -43,27 +43,27 @@ visualization_msgs::Marker KinectV2Hands::get_marker(ros::Time stamp, std::strin
 	marker.scale.z = 0.25;
 
 	switch(state){
-		case HANDSTATE_UNKNOWN:
+		case kinect_msgs::HandState::UNKNOWN:
 			marker.color.r = 0.75f;
 			marker.color.g = 0.75f;
 			marker.color.b = 0.75f;
 			break;
-		case HANDSTATE_NOTTRACKED:
+		case kinect_msgs::HandState::NOTTRACKED:
 			marker.color.r = 1.0f;
 			marker.color.g = 1.0f;
 			marker.color.b = 1.0f;
 			break;
-		case HANDSTATE_OPEN:
+		case kinect_msgs::HandState::OPEN:
 			marker.color.r = 0.0f;
 			marker.color.g = 1.0f;
 			marker.color.b = 0.0f;
 			break;
-		case HANDSTATE_CLOSED:
+		case kinect_msgs::HandState::CLOSED:
 			marker.color.r = 1.0f;
 			marker.color.g = 0.0f;
 			marker.color.b = 0.0f;
 			break;
-		case HANDSTATE_LASSO:
+		case kinect_msgs::HandState::LASSO:
 			marker.color.r = 0.0f;
 			marker.color.g = 0.0f;
 			marker.color.b = 1.0f;
