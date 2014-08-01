@@ -98,6 +98,8 @@ include_directories(
 )
 
 ## Declare a cpp library
+
+## Tf
 add_library(kinect_v2_tf
   src/kinect_v2_tf.cpp
 )
@@ -109,6 +111,7 @@ target_link_libraries(kinect_v2_tf
  ${catkin_LIBRARIES}
 )
 
+ ## Hands
 add_library(kinect_v2_hands
   src/kinect_v2_hands.cpp
 )
@@ -120,6 +123,19 @@ target_link_libraries(kinect_v2_hands
  ${catkin_LIBRARIES}
 )
 
+## Joy
+add_library(kinect_v2_joy
+  src/kinect_v2_joy.cpp
+)
+
+add_dependencies(kinect_v2_joy kinect_v2_joy_gencfg)
+add_dependencies(kinect_v2_joy kinect_v2_joy_gencpp)
+
+target_link_libraries(kinect_v2_joy
+ ${catkin_LIBRARIES}
+)
+
+## Surrogate
 add_library(kinect_v2_surrogate
   src/kinect_v2_surrogate.cpp
 )
@@ -133,12 +149,13 @@ target_link_libraries(kinect_v2_surrogate
 
 ## Declare a cpp executable
 add_executable(kinect_v2_tf_node src/kinect_v2_tf_node.cpp)
-
 add_executable(kinect_v2_hands_node src/kinect_v2_hands_node.cpp)
-
-add_executable(kinect_v2_surrogate_node src/kinect_v2_tf_node.cpp)
+add_executable(kinect_v2_joy_node src/kinect_v2_joy_node.cpp)
+add_executable(kinect_v2_surrogate_node src/kinect_v2_surrogate_node.cpp)
 
 add_dependencies(kinect_v2_hands_node kinect_msgs_generate_messages_cpp)
+add_dependencies(kinect_v2_surrogate_node kinect_msgs_generate_messages_cpp)
+add_dependencies(kinect_v2_joy_node kinect_msgs_generate_messages_cpp)
 add_dependencies(kinect_v2_tf_node kinect_msgs_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -151,6 +168,10 @@ target_link_libraries(kinect_v2_tf_node kinect_v2_tf
 )
 
 target_link_libraries(kinect_v2_hands_node kinect_v2_hands
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(kinect_v2_joy_node kinect_v2_joy
   ${catkin_LIBRARIES}
 )
 
