@@ -48,6 +48,8 @@ KinectV2Joy::KinectV2Joy(){
 	joy_msg.buttons.resize(n_buttons);
 	joy_msg.axes.resize(n_axes);
 
+	tracked_id = -1;
+
 	ros::spin();
 }
 

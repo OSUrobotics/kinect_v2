@@ -13,6 +13,7 @@
 #include <geometry_msgs/Pose.h>
 #include <kinect_msgs/SkeletonArray.h>
 #include <kinect_msgs/Skeleton.h>
+#include <std_msgs/Int32.h>
 
 class KinectV2Surrogate {
 public:
@@ -23,7 +24,9 @@ private:
 
 	ros::Subscriber bodies_sub;
 
-	int track_id;
+	ros::Publisher id_pub;
+
+	std_msgs::Int32 track_id;
 
 	void bodies_callback(const kinect_msgs::SkeletonArray &bodies);
 

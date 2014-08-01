@@ -17,8 +17,9 @@ KinectV2Surrogate::KinectV2Surrogate(){
 	ros::NodeHandle private_nh("~");
 
 	bodies_sub = private_nh.subscribe("/kinect_v2/bodies", 1, &KinectV2Surrogate::bodies_callback, this);
+	id_pub     = private_nh.advertise<std_msgs::Int32>("/kinect_v2/surrogate_id", 1);
 
-	track_id = -1;
+	track_id.data = -1;
 
 	ros::spin();
 }
@@ -30,16 +31,17 @@ void KinectV2Surrogate::bodies_callback(const kinect_msgs::SkeletonArray &bodies
 
 	// look for tracked body
 	for(int i = 0; i < bodies.bodies.size(); i++){
-		if(track_id == bodies.bodies[i].id){
+		if(track_id.data == bodies.bodies[i].id){
 		  broadcast_body_tf(ros::Time::now(), bodies.bodies[i]);
 		  return;
 		}
 	}
 
 	// if it can't be found, track the first body
-	track_id = bodies.bodies[0].id;
+	track_id.data = bodies.bodies[0].id;
 	broadcast_body_tf(ros::Time::now(), bodies.bodies[0]);
-	ROS_INFO("New tracking id: %d", track_id);
+	ROS_INFO("New tracking id: %d", track_id.data);
+	id_pub.publish(track_id);
 }
 
 void KinectV2Surrogate::broadcast_body_tf(ros::Time stamp, const kinect_msgs::Skeleton &body){
